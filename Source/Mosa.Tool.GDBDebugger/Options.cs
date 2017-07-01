@@ -30,7 +30,7 @@ namespace Mosa.Tool.GDBDebugger
 
 		public Options()
 		{
-			GDBPort = 2345;
+			GDBPort = 1234;
 			AutoConnect = false;
 			ImageFile = null;
 			EmulatorMemoryInMB = 256;

@@ -2,8 +2,10 @@
 
 using Mosa.Utility.RSP;
 using Mosa.Utility.RSP.Command;
+using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Windows.Forms;
 
 namespace Mosa.Tool.GDBDebugger.GDB
 {
@@ -44,20 +46,28 @@ namespace Mosa.Tool.GDBDebugger.GDB
 
 		public bool Connect(int port)
 		{
-			Disconnect();
+			try
+			{
+				Disconnect();
 
-			// todo: better error handling
-			TcpClient = new TcpClient("localhost", port);
-			var stream = new GDBNetworkStream(TcpClient.Client, true);
-			GDBClient = new GDBClient(stream);
+				// todo: better error handling
+				TcpClient = new TcpClient("localhost", port);
+				var stream = new GDBNetworkStream(TcpClient.Client, true);
+				GDBClient = new GDBClient(stream);
 
-			if (!GDBClient.IsConnected)
+				if (!GDBClient.IsConnected)
+					return false;
+
+				Break();
+				GetRegisters();
+
+				return true;
+			}
+			catch
+			{
+				MessageBox.Show($"Oh no :(\n\nSomething went terribly wrong. Could not connect to 'localhost' on port {port}.");
 				return false;
-
-			Break();
-			GetRegisters();
-
-			return true;
+			}
 		}
 
 		public void Disconnect()
@@ -80,6 +90,18 @@ namespace Mosa.Tool.GDBDebugger.GDB
 
 			GDBClient.SendCommandAsync(command);
 
+			CallOnRunning();
+		}
+
+		public void StepN(uint stepCount)
+		{
+			var command = new Step();
+			for(uint currentStep = 0; currentStep < stepCount - 1; currentStep++)
+			{
+				GDBClient.SendCommandAsync(command);
+			}
+			command = new Step(OnStep);
+			GDBClient.SendCommandAsync(command);
 			CallOnRunning();
 		}
 
