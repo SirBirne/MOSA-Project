@@ -93,6 +93,22 @@ namespace Mosa.Tool.GDBDebugger.GDB
 			CallOnRunning();
 		}
 
+		public void AddBreakPoint(BreakPoint bp)
+		{
+			var command1 = new SetBreakPoint(bp.Address, 4, 0);
+			GDBClient.SendCommandAsync(command1);
+			Break();
+			Continue();
+			CallOnRunning();
+		}
+
+		public void ClearBreakPoint(BreakPoint bp)
+		{
+			var command = new ClearBreakPoint(bp.Address, 4, 0);
+			GDBClient.SendCommandAsync(command);
+			CallOnRunning();
+		}
+
 		public void StepN(uint stepCount)
 		{
 			var command = new Step();
